@@ -1,5 +1,5 @@
-﻿using System.Text;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text;
 
 namespace TinyCSV
 {
@@ -32,7 +32,15 @@ namespace TinyCSV
 
 		private readonly Options options;
 
-		public Parser() : this(new Options {space = ',', title = 1, context = 2}) {}
+		public Parser() : this(new Options {space = ',', title = 1, context = 2}) { }
+		public Parser(char space) : this(new Options {space = space, title = 1, context = 2}) { }
+		public Parser(int title, int context) : this(new Options {space = ',', title = title, context = context}) { }
+
+		public Parser(char space, int title, int context) : this(new Options {
+			space = space,
+			title = title,
+			context = context
+		}) { }
 
 		public Parser(Options options)
 		{
@@ -49,7 +57,7 @@ namespace TinyCSV
 			while (index < length)
 			{
 				char c = input[index];
-				if (c == ',' || c == '\r' || c == '\n')
+				if (c == options.space || c == '\r' || c == '\n')
 					break;
 				if (builder != null)
 					builder.Append(c);
@@ -66,7 +74,7 @@ namespace TinyCSV
 				char c = input[index];
 				if (quote)
 				{
-					if (c == ',' || c == '\r' || c == '\n')
+					if (c == options.space || c == '\r' || c == '\n')
 						break;
 					if (c != '"')
 						return false;
@@ -101,7 +109,8 @@ namespace TinyCSV
 					index = i;
 					return;
 				}
-				builder.Length = 0;
+				if (builder != null)
+					builder.Length = 0;
 			}
 			ReadUnescape(input, builder);
 		}
@@ -215,6 +224,7 @@ namespace TinyCSV
 						++index;
 					if (index < length && input[index] == '\n')
 						++index;
+					++row;
 					break;
 				}
 				if (column > 0)
